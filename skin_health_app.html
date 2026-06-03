@@ -1,0 +1,523 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); background: var(--color-background-tertiary); }
+.phone { max-width: 380px; margin: 0 auto; background: var(--color-background-primary); min-height: 100vh; display: flex; flex-direction: column; border: 0.5px solid var(--color-border-tertiary); }
+.statusbar { background: #1B5E4A; height: 28px; display: flex; align-items: center; justify-content: flex-end; padding: 0 16px; }
+.statusbar span { color: #fff; font-size: 11px; opacity: 0.85; }
+.topbar { background: linear-gradient(135deg, #1B5E4A 0%, #2E7D5C 100%); padding: 16px 16px 24px; position: relative; }
+.topbar-back { display: none; color: #fff; background: rgba(255,255,255,0.15); border: none; border-radius: 8px; padding: 6px 10px; font-size: 13px; cursor: pointer; margin-bottom: 10px; }
+.topbar-back.visible { display: inline-flex; align-items: center; gap: 4px; }
+.app-title { color: #fff; font-size: 20px; font-weight: 500; }
+.app-subtitle { color: rgba(255,255,255,0.75); font-size: 13px; margin-top: 2px; }
+.scroll-area { flex: 1; overflow-y: auto; padding-bottom: 72px; }
+.section { display: none; }
+.section.active { display: block; }
+
+.hero-card { margin: 16px; background: var(--color-background-secondary); border-radius: 16px; border: 0.5px solid var(--color-border-tertiary); overflow: hidden; }
+.hero-banner { background: linear-gradient(135deg, #E8F5EF 0%, #D4EDE3 100%); padding: 20px; display: flex; align-items: center; gap: 14px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.hero-icon { width: 52px; height: 52px; border-radius: 14px; background: #1B5E4A; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hero-icon i { font-size: 26px; color: #fff; }
+.hero-text h2 { font-size: 16px; font-weight: 500; color: #0F3D2C; }
+.hero-text p { font-size: 13px; color: #2E7D5C; margin-top: 3px; line-height: 1.5; }
+.hero-body { padding: 16px; }
+.hero-body p { font-size: 14px; color: var(--color-text-secondary); line-height: 1.7; }
+
+.section-label { padding: 16px 16px 8px; font-size: 12px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.05em; text-transform: uppercase; }
+
+.menu-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 16px 16px; }
+.menu-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 16px 12px; cursor: pointer; transition: background 0.15s; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.menu-card:hover, .menu-card:active { background: var(--color-background-secondary); }
+.menu-card .icon-wrap { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.menu-card .icon-wrap i { font-size: 20px; }
+.menu-card h3 { font-size: 13px; font-weight: 500; color: var(--color-text-primary); line-height: 1.4; }
+.menu-card p { font-size: 11px; color: var(--color-text-tertiary); line-height: 1.4; }
+
+.content-area { padding: 0 16px 16px; }
+.content-header { display: flex; align-items: center; gap: 10px; padding: 8px 0 16px; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 16px; }
+.content-header .ch-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.content-header .ch-icon i { font-size: 18px; }
+.content-header h2 { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+
+.info-block { margin-bottom: 14px; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; }
+.info-block-header { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: var(--color-background-secondary); }
+.info-block-header span { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.info-block-header i.chevron { font-size: 16px; color: var(--color-text-tertiary); transition: transform 0.2s; }
+.info-block-header.open i.chevron { transform: rotate(180deg); }
+.info-block-body { padding: 14px; background: var(--color-background-primary); display: none; border-top: 0.5px solid var(--color-border-tertiary); }
+.info-block-body.open { display: block; }
+.info-block-body p { font-size: 13px; color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 8px; }
+.info-block-body p:last-child { margin-bottom: 0; }
+
+.pill-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.pill-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 10px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); }
+.pill-item i { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+.pill-item div { flex: 1; }
+.pill-item .pi-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+.pill-item .pi-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+
+.stat-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+.stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; }
+.stat-card .sc-val { font-size: 22px; font-weight: 500; margin-bottom: 2px; }
+.stat-card .sc-label { font-size: 11px; color: var(--color-text-secondary); line-height: 1.4; }
+
+.tip-card { margin-bottom: 10px; padding: 14px; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); display: flex; gap: 12px; align-items: flex-start; }
+.tip-card i { font-size: 20px; margin-top: 1px; flex-shrink: 0; }
+.tip-card .tc-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px; }
+.tip-card .tc-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; }
+
+.quiz-wrap { padding: 0 16px 16px; }
+.quiz-q { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 14px; line-height: 1.5; }
+.quiz-opts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.quiz-opt { padding: 12px 14px; border-radius: 10px; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); cursor: pointer; font-size: 13px; color: var(--color-text-primary); transition: background 0.15s, border-color 0.15s; text-align: left; }
+.quiz-opt:hover { background: var(--color-background-secondary); }
+.quiz-opt.correct { background: #E8F5EF; border-color: #1B5E4A; color: #0F3D2C; }
+.quiz-opt.wrong { background: #FDEDED; border-color: #C53030; color: #7B1A1A; }
+.quiz-result { padding: 12px 14px; border-radius: 10px; font-size: 13px; line-height: 1.6; display: none; }
+.quiz-result.show { display: block; }
+.quiz-result.ok { background: #E8F5EF; color: #0F3D2C; border: 0.5px solid #1B5E4A; }
+.quiz-result.nok { background: #FDEDED; color: #7B1A1A; border: 0.5px solid #C53030; }
+.quiz-next { margin-top: 10px; width: 100%; padding: 12px; border-radius: 10px; border: 0.5px solid var(--color-border-tertiary); background: #1B5E4A; color: #fff; font-size: 14px; cursor: pointer; display: none; }
+.quiz-next.show { display: block; }
+.quiz-progress { display: flex; gap: 4px; margin-bottom: 16px; }
+.qp-dot { height: 4px; flex: 1; border-radius: 4px; background: var(--color-border-tertiary); }
+.qp-dot.done { background: #1B5E4A; }
+.qp-dot.active { background: #5DBF9B; }
+
+.bottomnav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 380px; background: var(--color-background-primary); border-top: 0.5px solid var(--color-border-tertiary); display: flex; padding: 8px 0 12px; }
+.bnav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px; border: none; background: none; }
+.bnav-item i { font-size: 22px; color: var(--color-text-tertiary); }
+.bnav-item span { font-size: 10px; color: var(--color-text-tertiary); }
+.bnav-item.active i, .bnav-item.active span { color: #1B5E4A; }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+.badge-green { background: #E8F5EF; color: #0F3D2C; }
+.badge-amber { background: #FFF8E7; color: #6B4400; }
+.badge-red { background: #FDEDED; color: #7B1A1A; }
+</style>
+
+<h2 class="sr-only">Skin Health Promotion — aplikasi edukasi kesehatan kulit interaktif</h2>
+
+<div class="phone">
+  <div class="statusbar"><span>9:41</span></div>
+  <div class="topbar" id="topbar">
+    <button class="topbar-back" id="backBtn" onclick="goHome()"><i class="ti ti-arrow-left"></i> Beranda</button>
+    <div class="app-title" id="topTitle">Skin Health Promotion</div>
+    <div class="app-subtitle" id="topSub">Edukasi Kesehatan Kulit</div>
+  </div>
+
+  <div class="scroll-area">
+
+    <!-- HOME -->
+    <div class="section active" id="sec-home">
+      <div class="hero-card">
+        <div class="hero-banner">
+          <div class="hero-icon"><i class="ti ti-sparkles" aria-hidden="true"></i></div>
+          <div class="hero-text">
+            <h2>Kenali Kulitmu</h2>
+            <p>Kulit adalah organ terbesar tubuh. Pelajari cara merawatnya dengan baik.</p>
+          </div>
+        </div>
+        <div class="hero-body">
+          <p>Kulit yang sehat bukan hanya soal penampilan — ia adalah cerminan kesehatan tubuh secara keseluruhan. Mulai dari melindungi organ dalam hingga mengatur suhu tubuh, kulit memiliki peran vital yang sering kali kita sepelekan.</p>
+        </div>
+      </div>
+
+      <div class="section-label">Topik Edukasi</div>
+      <div class="menu-grid">
+        <div class="menu-card" onclick="showSection('anatomy')">
+          <div class="icon-wrap" style="background:#E8F5EF;"><i class="ti ti-layers-difference" style="color:#1B5E4A;" aria-hidden="true"></i></div>
+          <h3>Anatomi Kulit</h3>
+          <p>Struktur & fungsi lapisan kulit</p>
+        </div>
+        <div class="menu-card" onclick="showSection('causes')">
+          <div class="icon-wrap" style="background:#FFF8E7;"><i class="ti ti-alert-triangle" style="color:#8B6000;" aria-hidden="true"></i></div>
+          <h3>Sebab Kulit Tidak Sehat</h3>
+          <p>Faktor pemicu masalah kulit</p>
+        </div>
+        <div class="menu-card" onclick="showSection('impact')">
+          <div class="icon-wrap" style="background:#FDEDED;"><i class="ti ti-mood-sad" style="color:#C53030;" aria-hidden="true"></i></div>
+          <h3>Dampak Kulit Tidak Sehat</h3>
+          <p>Pengaruh fisik & psikologis</p>
+        </div>
+        <div class="menu-card" onclick="showSection('tips')">
+          <div class="icon-wrap" style="background:#E8F5EF;"><i class="ti ti-leaf" style="color:#1B5E4A;" aria-hidden="true"></i></div>
+          <h3>Tips Perawatan Kulit</h3>
+          <p>Rekomendasi & cara menjaga kulit</p>
+        </div>
+      </div>
+
+      <div class="section-label">Fakta Cepat</div>
+      <div style="padding: 0 16px 16px;">
+        <div class="stat-row">
+          <div class="stat-card"><div class="sc-val" style="color:#1B5E4A;">1,8 m²</div><div class="sc-label">Rata-rata luas permukaan kulit orang dewasa</div></div>
+          <div class="stat-card"><div class="sc-val" style="color:#1B5E4A;">2 kg</div><div class="sc-label">Berat kulit — organ tubuh terberat kedua</div></div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="sc-val" style="color:#8B6000;">30 hari</div><div class="sc-label">Siklus regenerasi sel kulit luar</div></div>
+          <div class="stat-card"><div class="sc-val" style="color:#C53030;">48%</div><div class="sc-label">Orang Indonesia pernah alami masalah kulit</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANATOMY -->
+    <div class="section" id="sec-anatomy">
+      <div class="content-area">
+        <div class="content-header">
+          <div class="ch-icon" style="background:#E8F5EF;"><i class="ti ti-layers-difference" style="color:#1B5E4A;" aria-hidden="true"></i></div>
+          <h2>Anatomi & Fungsi Kulit</h2>
+        </div>
+
+        <div class="pill-list" style="margin-bottom:16px;">
+          <div class="pill-item">
+            <i class="ti ti-square-rounded-filled" style="color:#1B5E4A;" aria-hidden="true"></i>
+            <div><div class="pi-title">Epidermis — Lapisan Terluar</div><div class="pi-desc">Garis pertahanan pertama tubuh. Mengandung melanosit (sel pigmen) yang menentukan warna kulit dan melindungi dari radiasi UV. Sel-selnya diperbaharui setiap ~28 hari.</div></div>
+          </div>
+          <div class="pill-item">
+            <i class="ti ti-square-rounded-filled" style="color:#5DBF9B;" aria-hidden="true"></i>
+            <div><div class="pi-title">Dermis — Lapisan Tengah</div><div class="pi-desc">Mengandung kolagen, elastin, folikel rambut, kelenjar keringat dan sebum, serta ujung saraf. Lapisan ini memberi kekuatan, elastisitas, dan sensasi pada kulit.</div></div>
+          </div>
+          <div class="pill-item">
+            <i class="ti ti-square-rounded-filled" style="color:#8B6000;" aria-hidden="true"></i>
+            <div><div class="pi-title">Hipodermis — Lapisan Terdalam</div><div class="pi-desc">Lapisan lemak subkutan yang berfungsi sebagai bantalan perlindungan, isolasi suhu tubuh, dan menyimpan energi cadangan.</div></div>
+          </div>
+        </div>
+
+        <div class="section-label" style="padding-left:0;">6 Fungsi Utama Kulit</div>
+        <div class="info-block">
+          <div class="info-block-header" onclick="toggleBlock(this)">
+            <span>🛡️ Proteksi</span><i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+          <div class="info-block-body">
+            <p>Kulit membentuk penghalang fisik terhadap patogen, bahan kimia, dan trauma mekanis. Lapisan asam alami kulit (pH 4,5–5,5) mencegah pertumbuhan bakteri berbahaya.</p>
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="info-block-header" onclick="toggleBlock(this)">
+            <span>🌡️ Regulasi Suhu</span><i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+          <div class="info-block-body">
+            <p>Kelenjar keringat melepas panas saat suhu tubuh meningkat. Pembuluh darah di dermis melebar atau menyempit untuk mengatur distribusi panas.</p>
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="info-block-header" onclick="toggleBlock(this)">
+            <span>☀️ Sintesis Vitamin D</span><i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+          <div class="info-block-body">
+            <p>Saat terpapar sinar UVB matahari, kulit mengubah provitamin D menjadi vitamin D3 yang krusial untuk kesehatan tulang, sistem imun, dan fungsi saraf.</p>
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="info-block-header" onclick="toggleBlock(this)">
+            <span>👆 Sensorik</span><i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+          <div class="info-block-body">
+            <p>Jutaan reseptor saraf di kulit mendeteksi sentuhan, tekanan, nyeri, suhu, dan getaran — memungkinkan kita berinteraksi dengan lingkungan sekitar.</p>
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="info-block-header" onclick="toggleBlock(this)">
+            <span>💧 Hidrasi & Keseimbangan Cairan</span><i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+          <div class="info-block-body">
+            <p>Kulit mencegah kehilangan air berlebihan dari tubuh. Lipid di epidermis membentuk barrier yang mempertahankan kelembaban jaringan di bawahnya.</p>
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="info-block-header" onclick="toggleBlock(this)">
+            <span>🧬 Imunitas</span><i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+          <div class="info-block-body">
+            <p>Sel Langerhans di epidermis adalah sentinel imun yang mendeteksi dan melaporkan ancaman patogen ke sistem kekebalan tubuh.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAUSES -->
+    <div class="section" id="sec-causes">
+      <div class="content-area">
+        <div class="content-header">
+          <div class="ch-icon" style="background:#FFF8E7;"><i class="ti ti-alert-triangle" style="color:#8B6000;" aria-hidden="true"></i></div>
+          <h2>Sebab Kulit Tidak Sehat</h2>
+        </div>
+
+        <div class="pill-list" style="margin-bottom:16px;">
+          <div class="pill-item">
+            <i class="ti ti-sun" style="color:#8B6000;" aria-hidden="true"></i>
+            <div><div class="pi-title">Paparan Sinar UV Berlebihan</div><div class="pi-desc">UVA dan UVB merusak DNA sel kulit, mengurai kolagen, menyebabkan hiperpigmentasi, penuaan dini, dan meningkatkan risiko kanker kulit.</div></div>
+          </div>
+          <div class="pill-item">
+            <i class="ti ti-droplet-off" style="color:#C53030;" aria-hidden="true"></i>
+            <div><div class="pi-title">Dehidrasi & Kurang Minum</div><div class="pi-desc">Asupan air kurang dari 2 liter/hari menyebabkan kulit kering, kusam, mudah berkerut, dan barrier kulit melemah sehingga rentan terhadap iritasi.</div></div>
+          </div>
+          <div class="pill-item">
+            <i class="ti ti-pizza" style="color:#8B6000;" aria-hidden="true"></i>
+            <div><div class="pi-title">Pola Makan Tidak Sehat</div><div class="pi-desc">Konsumsi gula tinggi memicu glikasi kolagen. Makanan berlemak trans dan olahan meningkatkan peradangan sistemik yang berdampak pada kulit.</div></div>
+          </div>
+          <div class="pill-item">
+            <i class="ti ti-brain" style="color:#5B4FCF;" aria-hidden="true"></i>
+            <div><div class="pi-title">Stres Kronis</div><div class="pi-desc">Kortisol tinggi akibat stres memicu produksi sebum berlebih, memperburuk jerawat, eksim, dan psoriasis. Stres juga memperlambat proses penyembuhan luka.</div></div>
+          </div>
+          <div class="pill-item">
+            <i class="ti ti-moon" style="color:#1B5E4A;" aria-hidden="true"></i>
+            <div><div class="pi-title">Kurang Tidur</div><div class="pi-desc">Selama tidur, hormon pertumbuhan menstimulasi regenerasi sel kulit. Tidur kurang dari 7 jam memperlambat perbaikan jaringan dan mempercepat penuaan.</div></div>
+          </div>
+          <div class="pill-item">
+            <i class="ti ti-wind" style="color:#888;" aria-hidden="true"></i>
+            <div><div class="pi-title">Polusi & Kontaminan</div><div class="pi-desc">Partikel polutan menembus pori-pori, memicu stres oksidatif, merusak barrier kulit, dan berkaitan dengan munculnya jerawat serta dermatitis.</div></div>
+          </div>
+          <div class="pill-item">
+            <i class="ti ti-flask" style="color:#C53030;" aria-hidden="true"></i>
+            <div><div class="pi-title">Produk Kimia Keras</div><div class="pi-desc">Sabun dengan pH basa tinggi, alkohol berlebih, dan pewangi sintetik merusak lapisan asam kulit, menyebabkan iritasi, alergi, dan dermatitis kontak.</div></div>
+          </div>
+          <div class="pill-item">
+            <i class="ti ti-dna" style="color:#5B4FCF;" aria-hidden="true"></i>
+            <div><div class="pi-title">Faktor Genetik & Hormonal</div><div class="pi-desc">Kondisi seperti atopi, psoriasis, dan kecenderungan berjerawat diturunkan secara genetik. Perubahan hormon (pubertas, menstruasi, kehamilan) juga mempengaruhi kondisi kulit.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPACT -->
+    <div class="section" id="sec-impact">
+      <div class="content-area">
+        <div class="content-header">
+          <div class="ch-icon" style="background:#FDEDED;"><i class="ti ti-mood-sad" style="color:#C53030;" aria-hidden="true"></i></div>
+          <h2>Dampak Kulit Tidak Sehat</h2>
+        </div>
+
+        <div class="section-label" style="padding-left:0;">Dampak Fisik</div>
+        <div class="tip-card" style="border-color:#F7C1C1; background:#FDEDED;">
+          <i class="ti ti-bug" style="color:#C53030;" aria-hidden="true"></i>
+          <div><div class="tc-title">Infeksi & Penyakit Kulit</div><div class="tc-desc">Barrier kulit yang rusak memudahkan bakteri, virus, dan jamur masuk — menyebabkan impetigo, dermatitis, selulitis, hingga infeksi kronis yang sulit sembuh.</div></div>
+        </div>
+        <div class="tip-card" style="border-color:#F7C1C1; background:#FDEDED;">
+          <i class="ti ti-clock" style="color:#C53030;" aria-hidden="true"></i>
+          <div><div class="tc-title">Penuaan Dini</div><div class="tc-desc">Kerusakan akumulatif dari UV, polusi, dan radikal bebas mempercepat degradasi kolagen dan elastin, menghasilkan kerutan, flek, dan kulit yang kendur lebih cepat.</div></div>
+        </div>
+        <div class="tip-card" style="border-color:#F7C1C1; background:#FDEDED;">
+          <i class="ti ti-stethoscope" style="color:#C53030;" aria-hidden="true"></i>
+          <div><div class="tc-title">Risiko Kanker Kulit</div><div class="tc-desc">Paparan UV yang tidak terlindungi dalam jangka panjang meningkatkan risiko melanoma dan karsinoma sel basal/skuamosa — kanker yang jumlahnya terus meningkat global.</div></div>
+        </div>
+
+        <div class="section-label" style="padding-left:0; margin-top:8px;">Dampak Psikologis & Sosial</div>
+        <div class="tip-card" style="border-color:#FAC775; background:#FFF8E7;">
+          <i class="ti ti-mood-empty" style="color:#8B6000;" aria-hidden="true"></i>
+          <div><div class="tc-title">Penurunan Kepercayaan Diri</div><div class="tc-desc">Penelitian menunjukkan 63% penderita kondisi kulit kronis mengalami penurunan signifikan pada kepercayaan diri dan citra tubuh mereka.</div></div>
+        </div>
+        <div class="tip-card" style="border-color:#FAC775; background:#FFF8E7;">
+          <i class="ti ti-heart-broken" style="color:#8B6000;" aria-hidden="true"></i>
+          <div><div class="tc-title">Depresi & Kecemasan</div><div class="tc-desc">Penyakit kulit yang terlihat seperti psoriasis, vitiligo, dan jerawat parah berkorelasi kuat dengan depresi dan gangguan kecemasan sosial.</div></div>
+        </div>
+        <div class="tip-card" style="border-color:#FAC775; background:#FFF8E7;">
+          <i class="ti ti-users" style="color:#8B6000;" aria-hidden="true"></i>
+          <div><div class="tc-title">Isolasi Sosial & Diskriminasi</div><div class="tc-desc">Stigma terhadap kondisi kulit yang terlihat menyebabkan sebagian penderita menarik diri dari interaksi sosial, menghindari tempat umum, dan mengalami diskriminasi di lingkungan kerja.</div></div>
+        </div>
+
+        <div class="section-label" style="padding-left:0; margin-top:8px;">Dampak Ekonomi</div>
+        <div class="tip-card" style="border-color:#9FE1CB; background:#E8F5EF;">
+          <i class="ti ti-currency-dollar" style="color:#1B5E4A;" aria-hidden="true"></i>
+          <div><div class="tc-title">Biaya Perawatan yang Tinggi</div><div class="tc-desc">Kondisi kulit kronis seperti eksim dan psoriasis membutuhkan perawatan jangka panjang — biaya konsultasi, obat, dan perawatan kulit dapat menguras anggaran kesehatan keluarga secara signifikan.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIPS -->
+    <div class="section" id="sec-tips">
+      <div class="content-area">
+        <div class="content-header">
+          <div class="ch-icon" style="background:#E8F5EF;"><i class="ti ti-leaf" style="color:#1B5E4A;" aria-hidden="true"></i></div>
+          <h2>Rekomendasi Perawatan Kulit</h2>
+        </div>
+
+        <div class="section-label" style="padding-left:0;">Rutinitas Harian</div>
+        <div class="info-block">
+          <div class="info-block-header" onclick="toggleBlock(this)">
+            <span>🌅 Rutinitas Pagi</span><i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+          <div class="info-block-body">
+            <p><strong>1. Bersihkan</strong> — Cuci wajah dengan pembersih lembut (pH 4,5–5,5) menggunakan air suam-suam kuku. Jangan menggosok, tepuk-tepuk hingga kering.</p>
+            <p><strong>2. Toner/Esens</strong> — Aplikasikan toner bebas alkohol untuk menyeimbangkan pH dan mempersiapkan kulit menyerap produk berikutnya.</p>
+            <p><strong>3. Serum</strong> — Gunakan serum vitamin C di pagi hari untuk perlindungan antioksidan dan mencerahkan kulit.</p>
+            <p><strong>4. Pelembap</strong> — Aplikasikan pelembap saat kulit masih sedikit lembap untuk mengunci hidrasi.</p>
+            <p><strong>5. Sunscreen (WAJIB)</strong> — Gunakan SPF 30+ minimal 15 menit sebelum keluar rumah. Ulangi setiap 2 jam bila terpapar matahari langsung.</p>
+          </div>
+        </div>
+        <div class="info-block">
+          <div class="info-block-header" onclick="toggleBlock(this)">
+            <span>🌙 Rutinitas Malam</span><i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+          </div>
+          <div class="info-block-body">
+            <p><strong>1. Double Cleansing</strong> — Mulai dengan pembersih berbasis minyak untuk melarutkan tabir surya dan riasan, lalu lanjutkan dengan pembersih berbasis air.</p>
+            <p><strong>2. Treatment</strong> — Malam hari cocok untuk produk aktif seperti retinol (untuk anti-aging), BHA (untuk pori-pori), atau niacinamide (untuk warna kulit merata).</p>
+            <p><strong>3. Pelembap Malam</strong> — Gunakan pelembap yang lebih kaya tekstur karena kulit beregenerasi saat tidur dan membutuhkan nutrisi lebih.</p>
+          </div>
+        </div>
+
+        <div class="section-label" style="padding-left:0; margin-top:4px;">Gaya Hidup Sehat untuk Kulit</div>
+        <div class="tip-card" style="background: var(--color-background-secondary);">
+          <i class="ti ti-droplet" style="color:#1B5E4A;" aria-hidden="true"></i>
+          <div><div class="tc-title">Hidrasi Optimal</div><div class="tc-desc">Minum 8 gelas air (±2 liter) per hari. Konsumsi makanan tinggi air seperti semangka, mentimun, dan tomat juga membantu hidrasi kulit dari dalam.</div></div>
+        </div>
+        <div class="tip-card" style="background: var(--color-background-secondary);">
+          <i class="ti ti-salad" style="color:#1B5E4A;" aria-hidden="true"></i>
+          <div><div class="tc-title">Nutrisi Kulit dari Dalam</div><div class="tc-desc">Perbanyak omega-3 (ikan, biji chia), antioksidan (berry, sayuran hijau), vitamin C (jeruk, paprika), dan zinc (kacang-kacangan) untuk mendukung kesehatan kulit.</div></div>
+        </div>
+        <div class="tip-card" style="background: var(--color-background-secondary);">
+          <i class="ti ti-run" style="color:#1B5E4A;" aria-hidden="true"></i>
+          <div><div class="tc-title">Olahraga Teratur</div><div class="tc-desc">Aktivitas fisik 30 menit/hari meningkatkan sirkulasi darah ke kulit, mengantarkan nutrisi dan oksigen ke sel-sel kulit, serta membuang toksin melalui keringat.</div></div>
+        </div>
+        <div class="tip-card" style="background: var(--color-background-secondary);">
+          <i class="ti ti-zzz" style="color:#5B4FCF;" aria-hidden="true"></i>
+          <div><div class="tc-title">Tidur Berkualitas</div><div class="tc-desc">Pastikan 7–9 jam tidur per malam. Gunakan sarung bantal sutra atau satin untuk mengurangi gesekan yang menyebabkan kerutan dan iritasi saat tidur.</div></div>
+        </div>
+        <div class="tip-card" style="background: var(--color-background-secondary);">
+          <i class="ti ti-heart" style="color:#C53030;" aria-hidden="true"></i>
+          <div><div class="tc-title">Kelola Stres</div><div class="tc-desc">Meditasi, yoga, atau olahraga ringan menurunkan kortisol yang memicu peradangan kulit. Jurnal gratitude 5 menit/hari terbukti mengurangi stres secara signifikan.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="section" id="sec-quiz">
+      <div class="content-area">
+        <div class="content-header">
+          <div class="ch-icon" style="background:#E8F5EF;"><i class="ti ti-brain" style="color:#1B5E4A;" aria-hidden="true"></i></div>
+          <h2>Uji Pengetahuanmu</h2>
+        </div>
+        <div class="quiz-wrap" style="padding:0;">
+          <div class="quiz-progress" id="qprog"></div>
+          <div class="quiz-q" id="quiz-question"></div>
+          <div class="quiz-opts" id="quiz-opts"></div>
+          <div class="quiz-result" id="quiz-result"></div>
+          <button class="quiz-next" id="quiz-next" onclick="nextQuestion()">Pertanyaan Berikutnya →</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="bottomnav" role="navigation" aria-label="Navigasi utama">
+    <button class="bnav-item active" id="nav-home" onclick="showSection('home')">
+      <i class="ti ti-home" aria-hidden="true"></i><span>Beranda</span>
+    </button>
+    <button class="bnav-item" id="nav-anatomy" onclick="showSection('anatomy')">
+      <i class="ti ti-layers-difference" aria-hidden="true"></i><span>Anatomi</span>
+    </button>
+    <button class="bnav-item" id="nav-causes" onclick="showSection('causes')">
+      <i class="ti ti-alert-triangle" aria-hidden="true"></i><span>Sebab</span>
+    </button>
+    <button class="bnav-item" id="nav-tips" onclick="showSection('tips')">
+      <i class="ti ti-leaf" aria-hidden="true"></i><span>Tips</span>
+    </button>
+    <button class="bnav-item" id="nav-quiz" onclick="showSection('quiz')">
+      <i class="ti ti-brain" aria-hidden="true"></i><span>Kuis</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+const sectionTitles = {
+  home: ['Skin Health Promotion','Edukasi Kesehatan Kulit'],
+  anatomy: ['Anatomi Kulit','Struktur & Fungsi'],
+  causes: ['Sebab Kulit Tidak Sehat','Faktor Pemicu'],
+  impact: ['Dampak Kulit Tidak Sehat','Fisik, Psikologis & Sosial'],
+  tips: ['Tips Perawatan Kulit','Rekomendasi & Cara Menjaga'],
+  quiz: ['Uji Pengetahuan','Tes Seberapa Paham Kamu']
+};
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById('nav-' + id);
+  if (nb) nb.classList.add('active');
+  const t = sectionTitles[id] || sectionTitles.home;
+  document.getElementById('topTitle').textContent = t[0];
+  document.getElementById('topSub').textContent = t[1];
+  const backBtn = document.getElementById('backBtn');
+  if (id === 'home') { backBtn.classList.remove('visible'); }
+  else if (id === 'impact') { backBtn.classList.add('visible'); document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active')); }
+  else { backBtn.classList.add('visible'); }
+  document.querySelector('.scroll-area').scrollTop = 0;
+  if (id === 'quiz') initQuiz();
+}
+
+function goHome() { showSection('home'); }
+
+function toggleBlock(header) {
+  const body = header.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  header.parentElement.parentElement.querySelectorAll('.info-block-body').forEach(b => b.classList.remove('open'));
+  header.parentElement.parentElement.querySelectorAll('.info-block-header').forEach(h => h.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); header.classList.add('open'); }
+}
+
+const questions = [
+  { q: "Berapa lapisan utama kulit manusia?", opts: ["1 lapisan","2 lapisan","3 lapisan","5 lapisan"], ans: 2, exp: "Kulit terdiri dari 3 lapisan utama: epidermis (terluar), dermis (tengah), dan hipodermis (terdalam). Masing-masing punya fungsi berbeda." },
+  { q: "Apa fungsi utama sunscreen (tabir surya)?", opts: ["Melembapkan kulit","Melindungi dari sinar UV","Memutihkan kulit","Mengurangi minyak berlebih"], ans: 1, exp: "Sunscreen melindungi kulit dari sinar UVA dan UVB yang bisa menyebabkan sunburn, penuaan dini, dan risiko kanker kulit. Gunakan SPF 30+ setiap hari!" },
+  { q: "Berapa lama siklus regenerasi sel kulit luar (epidermis)?", opts: ["7 hari","14 hari","28 hari","60 hari"], ans: 2, exp: "Sel-sel epidermis (keratinosit) diperbaharui sekitar setiap 28 hari — itulah kenapa perubahan perawatan kulit biasanya baru terlihat hasilnya setelah 1 bulan." },
+  { q: "Hormon stres manakah yang paling berdampak buruk pada kulit?", opts: ["Melatonin","Serotonin","Kortisol","Estrogen"], ans: 2, exp: "Kortisol yang tinggi akibat stres kronis memicu produksi sebum berlebih, memperburuk jerawat, memperlambat penyembuhan luka, dan memperparah kondisi seperti eksim." },
+  { q: "Vitamin apakah yang disintesis kulit saat terkena sinar matahari?", opts: ["Vitamin A","Vitamin B12","Vitamin C","Vitamin D"], ans: 3, exp: "Kulit mengubah provitamin D menjadi vitamin D3 saat terpapar sinar UVB. Vitamin D penting untuk kesehatan tulang, sistem imun, dan fungsi saraf." }
+];
+
+let qIdx = 0, score = 0, answered = false;
+
+function initQuiz() {
+  qIdx = 0; score = 0; answered = false;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[qIdx];
+  const prog = document.getElementById('qprog');
+  prog.innerHTML = questions.map((_, i) => `<div class="qp-dot ${i < qIdx ? 'done' : i === qIdx ? 'active' : ''}"></div>`).join('');
+  document.getElementById('quiz-question').textContent = `Q${qIdx+1}. ${q.q}`;
+  document.getElementById('quiz-opts').innerHTML = q.opts.map((o,i) =>
+    `<button class="quiz-opt" onclick="answer(${i})">${o}</button>`).join('');
+  document.getElementById('quiz-result').className = 'quiz-result';
+  document.getElementById('quiz-result').textContent = '';
+  document.getElementById('quiz-next').className = 'quiz-next';
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[qIdx];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((o,i) => { if(i === q.ans) o.classList.add('correct'); else if(i === idx) o.classList.add('wrong'); o.onclick = null; });
+  const res = document.getElementById('quiz-result');
+  if (idx === q.ans) {
+    score++;
+    res.className = 'quiz-result show ok';
+    res.textContent = '✓ Benar! ' + q.exp;
+  } else {
+    res.className = 'quiz-result show nok';
+    res.textContent = '✗ Belum tepat. ' + q.exp;
+  }
+  const nxt = document.getElementById('quiz-next');
+  nxt.className = 'quiz-next show';
+  nxt.textContent = qIdx < questions.length - 1 ? 'Pertanyaan Berikutnya →' : `Lihat Hasil (${score+( idx===q.ans?1:0)}/${questions.length}) →`;
+}
+
+function nextQuestion() {
+  if (qIdx < questions.length - 1) { qIdx++; renderQuestion(); }
+  else {
+    const finalScore = score;
+    const total = questions.length;
+    const pct = Math.round(finalScore / total * 100);
+    document.getElementById('quiz-question').textContent = `Kuis selesai! Skormu: ${finalScore}/${total} (${pct}%)`;
+    document.getElementById('quiz-opts').innerHTML = '';
+    document.getElementById('quiz-result').className = 'quiz-result show ok';
+    document.getElementById('quiz-result').textContent = pct >= 80 ? '🌟 Luar biasa! Pengetahuan kulitmu sudah sangat baik.' : pct >= 60 ? '👍 Bagus! Kamu sudah cukup paham. Coba pelajari lagi untuk hasil sempurna.' : '📚 Terus belajar! Jelajahi menu lainnya untuk meningkatkan pemahamanmu.';
+    document.getElementById('quiz-next').className = 'quiz-next show';
+    document.getElementById('quiz-next').textContent = 'Ulangi Kuis →';
+    document.getElementById('quiz-next').onclick = initQuiz;
+  }
+}
+
+initQuiz();
+</script>
